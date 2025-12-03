@@ -5,10 +5,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
-import ru.practicum.shareit.user.model.NewUser;
-import ru.practicum.shareit.user.model.UpdateUser;
+import ru.practicum.shareit.user.dto.NewUser;
+import ru.practicum.shareit.user.dto.UpdateUser;
 import ru.practicum.shareit.user.model.User;
-import ru.practicum.shareit.user.model.UserDto;
+import ru.practicum.shareit.user.dto.UserDto;
 
 @Slf4j
 @Service

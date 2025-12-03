@@ -3,9 +3,9 @@ package ru.practicum.shareit.user;
 import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.ValidationException;
 import ru.practicum.shareit.exception.NotFoundException;
-import ru.practicum.shareit.user.model.NewUser;
-import ru.practicum.shareit.user.model.UpdateUser;
-import ru.practicum.shareit.user.model.UserDto;
+import ru.practicum.shareit.user.dto.NewUser;
+import ru.practicum.shareit.user.dto.UpdateUser;
+import ru.practicum.shareit.user.dto.UserDto;
 
 /**
  * Сервис для управления пользователями в приложении ShareIt.

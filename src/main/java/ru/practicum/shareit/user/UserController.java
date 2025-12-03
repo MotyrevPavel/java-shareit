@@ -4,9 +4,9 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.shareit.user.model.NewUser;
-import ru.practicum.shareit.user.model.UpdateUser;
-import ru.practicum.shareit.user.model.UserDto;
+import ru.practicum.shareit.user.dto.NewUser;
+import ru.practicum.shareit.user.dto.UpdateUser;
+import ru.practicum.shareit.user.dto.UserDto;
 
 @RequiredArgsConstructor
 @RestController
