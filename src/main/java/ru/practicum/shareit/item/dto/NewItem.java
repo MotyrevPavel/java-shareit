@@ -38,7 +38,7 @@ public class NewItem {
     @NotNull(message = "Имя вещи не может быть null")
     @NotEmpty(message = "Имя вещи не может быть пустым")
     @NotBlank(message = "Имя вещи не может содержать только пробелы")
-    String name;
+    private String name;
 
     /**
      * Подробное описание предмета.
@@ -51,7 +51,7 @@ public class NewItem {
     @NotNull(message = "Описание не может быть null")
     @NotEmpty(message = "Описание не может быть пустым")
     @NotBlank(message = "Описание не может содержать только пробелы")
-    String description;
+    private String description;
 
     /**
      * Статус доступности предмета для аренды.
@@ -62,5 +62,5 @@ public class NewItem {
      * Важно: null не допускается — необходимо явно указать статус.
      */
     @NotNull(message = "Доступность товара должна быть указана (true/false)")
-    Boolean available;
+    private Boolean available;
 }
