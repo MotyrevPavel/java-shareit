@@ -1,10 +1,8 @@
 package ru.practicum.shareit.item.model;
 
-import lombok.Builder;
+import jakarta.persistence.*;
 import lombok.Data;
-import ru.practicum.shareit.item.ItemController;
-import ru.practicum.shareit.item.ItemRepository;
-import ru.practicum.shareit.item.ItemService;
+import ru.practicum.shareit.user.model.User;
 
 /**
  * Модель предмета (вещи) в системе аренды.
@@ -17,33 +15,34 @@ import ru.practicum.shareit.item.ItemService;
  * название ({@link #name});
  * описание ({@link #description});
  * статус доступности для аренды ({@link #available});
- * идентификатор владельца ({@link #userId}).
- *
- * @see ItemController
- * @see ItemService
- * @see ItemRepository
+ * владелец предмета ({@link #user}).
  */
 
 @Data
-@Builder
+@Entity
+@Table(name = "items")
 public class Item {
 
     /**
      * Уникальный идентификатор предмета.
      * Может быть null при создании (будет назначен БД).
      */
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     /**
      * Название предмета.
      * Обязательное поле, должно отражать суть вещи (например, "Дрель").
      */
+    @Column(name = "name", nullable = false)
     private String name;
 
     /**
      * Подробное описание предмета.
      * Может содержать детали о состоянии, особенностях, комплектации и т.п.
      */
+    @Column(name = "description")
     private String description;
 
     /**
@@ -52,11 +51,14 @@ public class Item {
      * false — предмет временно не доступен;
      * Значение устанавливает владелец предмета.
      */
+    @Column(name = "available", nullable = false)
     private Boolean available;
 
     /**
      * Идентификатор пользователя-владельца предмета.
      * Связывает предмет с конкретным пользователем системы.
      */
-    private Long userId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 }

@@ -1,7 +1,8 @@
 package ru.practicum.shareit.item;
 
 import ru.practicum.shareit.exception.NotFoundException;
-import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.item.comment.dto.CommentDto;
+import ru.practicum.shareit.item.comment.dto.NewComment;
 import ru.practicum.shareit.item.dto.*;
 
 import java.util.List;
@@ -19,10 +20,6 @@ import java.util.List;
  * объекты передачи данных, изолированные от внутренней модели;
  * операции требуют указания {@code userId} для проверки прав доступа;
  * поиск ({@link #searchAvailableItemByParam}) работает только по доступным предметам.
- *
- * @see ItemController
- * @see ItemRepository
- * @see Item
  */
 
 public interface ItemService {
@@ -60,7 +57,7 @@ public interface ItemService {
      * @return {@link ItemDto} с данными предмета.
      * @throws NotFoundException если предмет с указанным {@code id} не найден
      */
-    ItemDto getById(Long id);
+    ItemFullDto getById(Long id);
 
     /**
      * Возвращает список всех предметов, принадлежащих пользователю.
@@ -69,7 +66,7 @@ public interface ItemService {
      * @return Список {@link ItemDto} всех предметов пользователя.
      * Может быть пустым, если у пользователя нет предметов.
      */
-    List<ItemDto> getAllByUserId(Long userId);
+    List<ItemFullDto> getAllByUserId(Long userId);
 
     /**
      * Ищет доступные для аренды предметы по текстовому параметру.
@@ -83,4 +80,6 @@ public interface ItemService {
      * @return Список {@link ItemDto} подходящих предметов.
      */
     List<ItemDto> searchAvailableItemByParam(String text);
+
+    CommentDto createNewComment(Long itemId, Long userId, NewComment comment);
 }

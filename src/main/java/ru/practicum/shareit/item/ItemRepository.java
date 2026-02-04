@@ -1,76 +1,41 @@
 package ru.practicum.shareit.item;
 
-import ru.practicum.shareit.exception.NotFoundException;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import ru.practicum.shareit.item.model.Item;
 
 import java.util.List;
 
-/**
- * Репозиторий для работы с сущностями предметов (Item) в системе аренды.
- * Обеспечивает низкоуровневый доступ к данным предметов, включая:
- * создание новых записей;
- * обновление существующих предметов;
- * получение предмета по идентификатору;
- * извлечение всех предметов пользователя;
- * поиск доступных предметов по текстовому критерию.
- * Ключевые особенности:
- * работает с доменными сущностями {@link Item} (не с DTO);
- * методы возвращают полные сущности {@link Item}, включая все поля (id, name, description и др.).
- *
- * @see Item
- * @see ItemService
- * @see ItemController
- */
-
-public interface ItemRepository {
+public interface ItemRepository extends JpaRepository<Item, Long> {
 
     /**
-     * Сохраняет новый предмет в хранилище.
+     * Возвращает список предметов (вещей), принадлежащих пользователю с указанным идентификатором.
      *
-     * @param item Сущность предмета, которую необходимо создать.
-     *             Поле {@code item.id} может быть null (будет сгенерировано СУБД).
-     * @return Сохращённая сущность {@link Item} с присвоенным идентификатором.
+     * @param userId уникальный идентификатор пользователя‑владельца предметов (соответствует полю user_id в таблице items)
+     * @return список объектов {@link Item}, принадлежащих пользователю с данным ID;
+     * если предметов нет — возвращается пустой список (не null)
+     * @implNote Метод использует связь Item и User для фильтрации по полю user_id.
+     * SQL‑запрос будет иметь вид: SELECT * FROM items WHERE user_id = ?
      */
-    Item create(Item item);
+    List<Item> findByUserId(Long userId);
 
     /**
-     * Обновляет существующий предмет в хранилище.
+     * Ищет предметы, у которых:
+     * - в названии (name) ИЛИ описании (description) содержится указанная подстрока (частичное совпадение);
+     * - статус доступности available = true.
+     * Поиск выполняется без учёта регистра.
      *
-     * @param item Сущность предмета с новыми значениями полей.
-     *             Должно содержать корректный {@code item.id} для идентификации записи.
-     * @return Обновлённая сущность {@link Item} после сохранения в хранилище.
-     * @throws NotFoundException если {@code item.id} null или не найден в БД
+     * @param text поисковая подстрока (например, "дрель", "ремонт").
+     *             Если null или пустая строка — возвращаются все доступные предметы.
+     * @return список предметов, удовлетворяющих условиям;
+     * если совпадений нет — возвращается пустой список (не null)
+     * @implNote Использует JPQL с LOWER() и LIKE для игнорирования регистра и частичного совпадения.
+     * Фильтрация по available = true выполняется явно в запросе.
      */
-    Item update(Item item);
-
-    /**
-     * Получает предмет по его уникальному идентификатору.
-     *
-     * @param id Идентификатор предмета (должен быть положительным).
-     * @return Сущность {@link Item}, если найдена.
-     * @throws NotFoundException если предмет с указанным {@code id} не существует
-     */
-    Item getById(Long id);
-
-    /**
-     * Возвращает все предметы, принадлежащие указанному пользователю.
-     *
-     * @param userId Идентификатор пользователя‑владельца предметов.
-     * @return Список сущностей {@link Item} пользователя.
-     * Может быть пустым, если у пользователя нет предметов.
-     */
-    List<Item> getAllByUserId(Long userId);
-
-    /**
-     * Ищет доступные для аренды предметы, соответствующие текстовому критерию.
-     * Условия поиска:
-     * ищутся только предметы со статусом {@code item.available} = {@code true};
-     * поиск ведётся по полям {@code item.name} и {@code item.description} (частичное совпадение);
-     * сравнение выполняется без учёта регистра.
-     *
-     * @param text Текстовый критерий поиска (например, "стул", "деревянный").
-     *             Если пустая строка — возвращается пустой список.
-     * @return Список сущностей {@link Item}, соответствующих критериям.
-     */
-    List<Item> searchAvailableItemByParam(String text);
+    @Query("SELECT i FROM Item i " +
+            "WHERE (LOWER(i.name) LIKE CONCAT('%', LOWER(:text), '%') " +
+            "   OR LOWER(i.description) LIKE CONCAT('%', LOWER(:text), '%')) " +
+            "   AND i.available = true")
+    List<Item> searchAvailableItemByParam(@Param("text") String text);
 }

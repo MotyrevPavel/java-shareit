@@ -17,10 +17,10 @@ public class UserMapper {
     }
 
     public static User toUser(NewUser newUser) {
-        return User.builder()
-                .name(newUser.getName())
-                .email(newUser.getEmail())
-                .build();
+        User user = new User();
+        user.setName(newUser.getName());
+        user.setEmail(newUser.getEmail());
+        return user;
     }
 
     public static User toUser(User user, UpdateUser updateUser) {

@@ -4,6 +4,8 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.shareit.item.comment.dto.CommentDto;
+import ru.practicum.shareit.item.comment.dto.NewComment;
 import ru.practicum.shareit.item.dto.*;
 
 
@@ -31,14 +33,14 @@ public class ItemController {
     }
 
     @GetMapping("/{itemId}")
-    public ResponseEntity<ItemDto> getById(@PathVariable Long itemId) {
-        ItemDto itemDto = itemService.getById(itemId);
+    public ResponseEntity<ItemFullDto> getById(@PathVariable Long itemId) {
+        ItemFullDto itemDto = itemService.getById(itemId);
         return ResponseEntity.ok().body(itemDto);
     }
 
     @GetMapping
-    public ResponseEntity<List<ItemDto>> getByUserId(@RequestHeader("X-Sharer-User-Id") Long userId) {
-        List<ItemDto> items = itemService.getAllByUserId(userId);
+    public ResponseEntity<List<ItemFullDto>> getByUserId(@RequestHeader("X-Sharer-User-Id") Long userId) {
+        List<ItemFullDto> items = itemService.getAllByUserId(userId);
         return ResponseEntity.ok().body(items);
     }
 
@@ -46,5 +48,13 @@ public class ItemController {
     public ResponseEntity<List<ItemDto>> search(@RequestParam String text) {
         List<ItemDto> items = itemService.searchAvailableItemByParam(text);
         return ResponseEntity.ok().body(items);
+    }
+
+    @PostMapping("/{itemId}/comment")
+    public ResponseEntity<CommentDto> create(@PathVariable Long itemId,
+                                             @RequestHeader("X-Sharer-User-Id") Long userId,
+                                             @Valid @RequestBody NewComment comment) {
+        CommentDto commentDto = itemService.createNewComment(itemId, userId, comment);
+        return ResponseEntity.ok().body(commentDto);
     }
 }
