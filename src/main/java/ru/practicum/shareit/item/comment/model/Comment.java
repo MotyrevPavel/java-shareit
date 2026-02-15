@@ -1,4 +1,4 @@
-package ru.practicum.shareit.booking;
+package ru.practicum.shareit.item.comment.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
@@ -9,17 +9,14 @@ import java.time.LocalDateTime;
 
 @Data
 @Entity
-@Table(name = "bookings")
-public class Booking {
+@Table(name = "comments")
+public class Comment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "start", columnDefinition = "TIMESTAMP", nullable = false)
-    private LocalDateTime start;
-
-    @Column(name = "finish", columnDefinition = "TIMESTAMP", nullable = false)
-    private LocalDateTime end;
+    @Column(name = "text", nullable = false)
+    private String text;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "item_id", nullable = false)
@@ -27,8 +24,8 @@ public class Booking {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
-    private User booker;
+    private User author;
 
-    @Enumerated(EnumType.STRING)
-    private BookingState status;
+    @Column(name = "created", nullable = false)
+    private LocalDateTime created;
 }

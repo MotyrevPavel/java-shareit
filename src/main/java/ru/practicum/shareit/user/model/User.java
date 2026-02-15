@@ -1,6 +1,6 @@
 package ru.practicum.shareit.user.model;
 
-import lombok.Builder;
+import jakarta.persistence.*;
 import lombok.Data;
 
 /**
@@ -12,14 +12,13 @@ import lombok.Data;
  * геттеров и сеттеров
  * методов {@code equals()} и {@code hashCode()}
  * метода {@code toString()}
- * Использует {@link lombok.Builder} для удобного создания экземпляров через паттерн Builder
  *
  * @see lombok.Data
- * @see lombok.Builder
  */
 
 @Data
-@Builder
+@Entity
+@Table(name = "users")
 public class User {
 
     /**
@@ -31,6 +30,8 @@ public class User {
      * после сохранения — положительное число
      * уникально в пределах системы
      */
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     /**
@@ -41,6 +42,7 @@ public class User {
      * длина и формат не ограничены на уровне модели
      * обычно проверяется на корректность на уровне сервиса
      */
+    @Column(name = "name", nullable = false)
     private String name;
 
     /**
@@ -52,5 +54,6 @@ public class User {
      * уникален в пределах системы (проверка на уровне сервиса/хранилища)
      * Пример корректного значения: {@code user@example.com}
      */
+    @Column(name = "email", nullable = false)
     private String email;
 }
