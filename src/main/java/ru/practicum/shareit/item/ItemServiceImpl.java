@@ -18,6 +18,8 @@ import ru.practicum.shareit.item.comment.dto.NewComment;
 import ru.practicum.shareit.item.comment.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.dto.*;
+import ru.practicum.shareit.request.ItemRequest;
+import ru.practicum.shareit.request.ItemRequestRepository;
 import ru.practicum.shareit.user.UserRepository;
 import ru.practicum.shareit.user.model.User;
 
@@ -33,6 +35,7 @@ public class ItemServiceImpl implements ItemService {
     private final UserRepository userRepository;
     private final BookingRepository bookingRepository;
     private final CommentRepository commentRepository;
+    private final ItemRequestRepository itemRequestRepository;
 
     @Override
     public ItemDto create(NewItem newItem, Long userId) {
@@ -42,8 +45,15 @@ public class ItemServiceImpl implements ItemService {
             log.error("В базе отсутствует пользователь с ID {}", userId);
             throw new NotFoundException("В базе отсутствует пользователь с ID " + userId);
         }
+        ItemRequest itemRequest;
+        if (newItem.getRequestId() == null) {
+            itemRequest = null;
+        } else {
+            Optional<ItemRequest> optionalItemRequest = itemRequestRepository.findById(newItem.getRequestId());
+            itemRequest = optionalItemRequest.orElse(null);
+        }
         User user = optionalUser.get();
-        Item item = ItemMapper.toItem(newItem, user);
+        Item item = ItemMapper.toItem(newItem, user, itemRequest);
         item = itemRepository.save(item);
         log.info("Вещь добавлена в репозиторий {}", item);
         return ItemMapper.toDto(item);

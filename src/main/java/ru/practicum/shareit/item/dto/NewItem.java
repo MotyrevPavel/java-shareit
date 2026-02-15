@@ -63,4 +63,6 @@ public class NewItem {
      */
     @NotNull(message = "Доступность товара должна быть указана (true/false)")
     private Boolean available;
+
+    private Long requestId;
 }
