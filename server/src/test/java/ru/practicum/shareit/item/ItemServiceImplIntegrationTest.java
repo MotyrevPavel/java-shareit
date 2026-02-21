@@ -341,13 +341,10 @@ class ItemServiceImplIntegrationTest {
         User user = createUser("user", "user@example.com");
         User userDb = userRepository.save(user);
 
-        ItemRequest itemRequestDb1 = createItemRequestInDb();
-        ItemRequest itemRequestDb2 = createItemRequestInDb();
-
-        Item item = createItem("Молоток", "Good", userDb, itemRequestDb1);
+        Item item = createItem("Молоток", "Good", userDb, null);
         Item itemDb = itemRepository.save(item);
 
-        Item item2 = createItem("Долото", "VeryGood", userDb, itemRequestDb2);
+        Item item2 = createItem("Долото", "VeryGood", userDb, null);
         Item itemDb2 = itemRepository.save(item2);
 
         User booker1 = createUser("booker1", "booker1@example.com");
@@ -589,8 +586,8 @@ class ItemServiceImplIntegrationTest {
 
         User booker1 = createUser("booker1", "booker1@example.com");
         User booker1Db = userRepository.save(booker1);
-        createBookingInDb(LocalDateTime.now().minusHours(2),
-                LocalDateTime.now().plusHours(1), itemDb, booker1Db);
+        createBookingInDb(LocalDateTime.now().plusHours(3),
+                LocalDateTime.now().plusHours(6), itemDb, booker1Db);
 
         NewComment newComment = NewComment.builder()
                 .text("Отличный Молоток, очень доволен!")

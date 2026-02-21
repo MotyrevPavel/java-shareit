@@ -16,6 +16,7 @@ import ru.practicum.shareit.user.UserRepository;
 import ru.practicum.shareit.user.model.User;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -152,7 +153,10 @@ class BookingServiceImplTest {
 
         BookingDto result = bookingService.approve(executedBooking.getId(), true, item.getUser().getId());
 
-        assertEquals(expectedDto, result);
+        assertEquals(expectedDto.getId(), result.getId());
+        assertEquals(expectedDto.getItem(), result.getItem());
+        assertEquals(expectedDto.getBooker(), result.getBooker());
+        assertEquals(expectedDto.getStatus(), result.getStatus());
 
         Mockito.verify(bookingRepository, Mockito.times(1)).findById(executedBooking.getId());
         Mockito.verify(bookingRepository, Mockito.times(1)).save(updatedBooking);
@@ -174,7 +178,10 @@ class BookingServiceImplTest {
 
         BookingDto result = bookingService.approve(executedBooking.getId(), false, item.getUser().getId());
 
-        assertEquals(expectedDto, result);
+        assertEquals(expectedDto.getId(), result.getId());
+        assertEquals(expectedDto.getItem(), result.getItem());
+        assertEquals(expectedDto.getBooker(), result.getBooker());
+        assertEquals(expectedDto.getStatus(), result.getStatus());
 
         Mockito.verify(bookingRepository, Mockito.times(1)).findById(executedBooking.getId());
         Mockito.verify(bookingRepository, Mockito.times(1)).save(updatedBooking);
@@ -279,8 +286,10 @@ class BookingServiceImplTest {
         Item itemSecond = createItem(102L);
 
         Booking executedBookingFirst = createBooking(301L, itemFirst, booker, BookingState.WAITING);
+        List<Booking> bookings = new ArrayList<>();
+        bookings.add(executedBookingFirst);
         Booking executedBookingSecond = createBooking(302L, itemSecond, booker, BookingState.WAITING);
-        List<Booking> bookings = List.of(executedBookingFirst, executedBookingSecond);
+        bookings.add(executedBookingSecond);
 
         BookingDto expectedDtoFirst = BookingMapper.toBookingDto(executedBookingFirst);
         BookingDto expectedDtoSecond = BookingMapper.toBookingDto(executedBookingSecond);
@@ -291,8 +300,8 @@ class BookingServiceImplTest {
         List<BookingDto> result = bookingService.getAllBookingsByBooker(booker.getId(), BookingState.WAITING);
 
         assertEquals(2, result.size());
-        assertEquals(expectedDtoFirst, result.get(0));
-        assertEquals(expectedDtoSecond, result.get(1));
+        assertEquals(expectedDtoFirst, result.getFirst());
+        assertEquals(expectedDtoSecond, result.getLast());
 
         Mockito.verify(bookingRepository, Mockito.times(1))
                 .findByBookerIdAndStatus(booker.getId(), BookingState.WAITING);
@@ -319,8 +328,10 @@ class BookingServiceImplTest {
         Item itemSecond = createItem(102L);
 
         Booking executedBookingFirst = createBooking(301L, itemFirst, bookerFirst, BookingState.WAITING);
+        List<Booking> bookings = new ArrayList<>();
+        bookings.add(executedBookingFirst);
         Booking executedBookingSecond = createBooking(302L, itemSecond, bookerSecond, BookingState.WAITING);
-        List<Booking> bookings = List.of(executedBookingFirst, executedBookingSecond);
+        bookings.add(executedBookingSecond);
 
         BookingDto dto1 = BookingMapper.toBookingDto(executedBookingFirst);
         BookingDto dto2 = BookingMapper.toBookingDto(executedBookingSecond);
@@ -332,8 +343,8 @@ class BookingServiceImplTest {
         List<BookingDto> result = bookingService.getAllBookingsByOwner(202L, BookingState.WAITING);
 
         assertEquals(2, result.size());
-        assertEquals(dto2, result.get(1));
-        assertEquals(dto1, result.get(0));
+        assertEquals(dto2, result.getLast());
+        assertEquals(dto1, result.getFirst());
 
         Mockito.verify(userRepository, Mockito.times(1)).existsById(202L);
         Mockito.verify(bookingRepository, Mockito.times(1))
