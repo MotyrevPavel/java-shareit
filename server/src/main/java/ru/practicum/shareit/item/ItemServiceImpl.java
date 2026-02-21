@@ -132,7 +132,7 @@ public class ItemServiceImpl implements ItemService {
         List<Booking> bookings =
                 bookingRepository.findByItemIdAndBookerIdAndStatus(itemId, userId, BookingState.APPROVED);
         bookings = bookings.stream()
-                .filter(booking -> booking.getEnd().isBefore(LocalDateTime.now(ZoneId.of("Europe/Moscow"))))
+                .filter(booking -> booking.getEnd().isBefore(LocalDateTime.now()))
                 .toList();
         if (bookings.isEmpty()) {
             log.error("Ошибка комментирования пользователем с ID {} вещи с ID {}", userId, itemId);
