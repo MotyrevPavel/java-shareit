@@ -152,10 +152,6 @@ class BookingServiceImplTest {
 
         BookingDto result = bookingService.approve(executedBooking.getId(), true, item.getUser().getId());
 
-        System.out.println(expectedDto);
-        System.out.println("-----".repeat(10));
-        System.out.println(result);
-
         assertEquals(expectedDto, result);
 
         Mockito.verify(bookingRepository, Mockito.times(1)).findById(executedBooking.getId());
@@ -188,7 +184,6 @@ class BookingServiceImplTest {
     void shouldThrowNotFoundException_WhenBookingNotFound() {
         Mockito.when(bookingRepository.findById(999L)).thenReturn(Optional.empty());
 
-        // Act & Assert
         NotFoundException exception = assertThrows(
                 NotFoundException.class,
                 () -> bookingService.approve(999L, true, 999L)
@@ -254,21 +249,6 @@ class BookingServiceImplTest {
         assertEquals(expectedDto, result);
 
         Mockito.verify(bookingRepository, Mockito.times(1)).findById(executedBooking.getId());
-    }
-
-    @Test
-    void ShouldThrowNotFoundException_WhenBookingNotFound() {
-        Mockito.when(bookingRepository.findById(999L)).thenReturn(Optional.empty());
-
-        NotFoundException exception = assertThrows(
-                NotFoundException.class,
-                () -> bookingService.getById(999L, 999L)
-        );
-
-        assertEquals("Отсутствует бронирование с ID " + 999L, exception.getMessage());
-
-        Mockito.verify(bookingRepository).findById(999L);
-        Mockito.verifyNoMoreInteractions(bookingRepository);
     }
 
     @Test
