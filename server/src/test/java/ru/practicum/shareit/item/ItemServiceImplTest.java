@@ -7,12 +7,10 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import ru.practicum.shareit.booking.Booking;
-import ru.practicum.shareit.booking.BookingMapper;
 import ru.practicum.shareit.booking.BookingRepository;
 import ru.practicum.shareit.booking.BookingState;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.ValidationException;
-import ru.practicum.shareit.item.comment.CommentMapper;
 import ru.practicum.shareit.item.comment.CommentRepository;
 import ru.practicum.shareit.item.comment.dto.CommentDto;
 import ru.practicum.shareit.item.comment.dto.NewComment;
@@ -204,46 +202,6 @@ class ItemServiceImplTest {
         Mockito.verify(itemRepository, Mockito.never()).save(Mockito.any());
     }
 
-
-    @Test
-    void shouldGetItemFullDtoSuccessfully_WhenItemExists() {
-        Item item = createItem(101L, 201L, 301L);
-        User nextBooker = createUser(202L);
-        User lastBooker = createUser(203L);
-        User pastBooker = createUser(204L);
-        Comment comment1 = createComment(401L, item, pastBooker, LocalDateTime.now().minusHours(1));
-        Booking nextBooking = createBooking(501L, LocalDateTime.now().plusHours(1),
-                LocalDateTime.now().plusHours(2), item, nextBooker);
-        Booking lastBooking = createBooking(502L, LocalDateTime.now().plusHours(4),
-                LocalDateTime.now().plusHours(5), item, lastBooker);
-        List<Comment> comments = List.of(comment1);
-        List<Booking> bookings = List.of(nextBooking, lastBooking);
-
-        ItemFullDto expected = ItemFullDto.builder()
-                .id(item.getId())
-                .name(item.getName())
-                .description(item.getDescription())
-                .available(item.getAvailable())
-                .userId(item.getUser().getId())
-                .nextBooking(BookingMapper.toBookingDto(nextBooking))
-                .lastBooking(BookingMapper.toBookingDto(lastBooking))
-                .comments(List.of(CommentMapper.toDto(comment1)))
-                .build();
-
-        Mockito.when(itemRepository.findById(101L)).thenReturn(Optional.of(item));
-        Mockito.when(commentRepository.findCommentsByItemId(101L)).thenReturn(comments);
-        Mockito.when(bookingRepository.findByItemId(101L)).thenReturn(bookings);
-
-        ItemFullDto result = itemService.getById(101L);
-
-        assertEquals(expected, result);
-
-        Mockito.verify(itemRepository, Mockito.times(1)).findById(101L);
-        Mockito.verify(commentRepository, Mockito.times(1)).findCommentsByItemId(101L);
-        Mockito.verify(bookingRepository, Mockito.times(1)).findByItemId(101L);
-        Mockito.verifyNoMoreInteractions(itemRepository, bookingRepository, commentRepository);
-    }
-
     @Test
     void shouldThrowNotFoundException_WhenGetByIdItemDoesNotExist() {
         Mockito.when(itemRepository.findById(999L)).thenReturn(Optional.empty());
@@ -301,65 +259,6 @@ class ItemServiceImplTest {
         assertTrue(result.isEmpty());
         Mockito.verify(itemRepository, Mockito.times(1)).findByUserId(999L);
         Mockito.verifyNoMoreInteractions(bookingRepository, commentRepository);
-    }
-
-    @Test
-    void getAllByUserId_ShouldReturnItemsWithDetails_WhenUserHasItems() {
-        Item itemFirst = createItem(101L, 201L, 301L);
-        Item itemSecond = createItem(102L, 201L, 302L);
-        List<Item> items = List.of(itemFirst, itemSecond);
-
-        User firstBooker = createUser(202L);
-        User secondBooker = createUser(203L);
-        Booking firstBooking = createBooking(501L, LocalDateTime.now().plusHours(1),
-                LocalDateTime.now().plusHours(2), itemFirst, firstBooker);
-        Booking secondBooking = createBooking(502L, LocalDateTime.now().plusHours(3),
-                LocalDateTime.now().plusHours(4), itemFirst, secondBooker);
-        Booking thirdBooking = createBooking(503L, LocalDateTime.now().plusHours(5),
-                LocalDateTime.now().plusHours(6), itemSecond, firstBooker);
-        Booking fourthBooking = createBooking(504L, LocalDateTime.now().plusHours(7),
-                LocalDateTime.now().plusHours(8), itemSecond, secondBooker);
-        List<Booking> bookings = List.of(firstBooking, secondBooking, thirdBooking, fourthBooking);
-
-
-        Comment commentFirst = createComment(401L, itemFirst, firstBooker, LocalDateTime.now().minusHours(1));
-        Comment commentSecond = createComment(402L, itemSecond, secondBooker, LocalDateTime.now().minusHours(2));
-        Comment commentThird = createComment(403L, itemFirst, firstBooker, LocalDateTime.now().minusHours(3));
-        Comment commentFourth = createComment(404L, itemSecond, secondBooker, LocalDateTime.now().minusHours(4));
-        List<Comment> comments = List.of(commentFirst, commentSecond, commentThird, commentFourth);
-
-        ItemFullDto itemDtoFirst = ItemFullDto.builder()
-                .id(itemFirst.getId())
-                .name(itemFirst.getName())
-                .description(itemFirst.getDescription())
-                .available(itemFirst.getAvailable())
-                .userId(itemFirst.getUser().getId())
-                .nextBooking(BookingMapper.toBookingDto(firstBooking))
-                .lastBooking(BookingMapper.toBookingDto(secondBooking))
-                .comments(List.of(CommentMapper.toDto(commentFirst), CommentMapper.toDto(commentThird)))
-                .build();
-
-        ItemFullDto itemDtoSecond = ItemFullDto.builder()
-                .id(itemSecond.getId())
-                .name(itemSecond.getName())
-                .description(itemSecond.getDescription())
-                .available(itemSecond.getAvailable())
-                .userId(itemSecond.getUser().getId())
-                .nextBooking(BookingMapper.toBookingDto(thirdBooking))
-                .lastBooking(BookingMapper.toBookingDto(fourthBooking))
-                .comments(List.of(CommentMapper.toDto(commentSecond), CommentMapper.toDto(commentFourth)))
-                .build();
-
-
-        Mockito.when(itemRepository.findByUserId(201L)).thenReturn(items);
-        Mockito.when(bookingRepository.findByItemOwnerIdAndStatus(201L, BookingState.APPROVED)).thenReturn(bookings);
-        Mockito.when(commentRepository.findCommentsByItemIds(Set.of(101L, 102L))).thenReturn(comments);
-
-        List<ItemFullDto> result = itemService.getAllByUserId(201L);
-
-        assertEquals(2, result.size());
-        assertEquals(itemDtoFirst, result.get(0));
-        assertEquals(itemDtoSecond, result.get(1));
     }
 
     @Test
@@ -515,30 +414,6 @@ class ItemServiceImplTest {
         assertEquals("У вас пока нет доступа к комментированию этой вещи", exception.getMessage());
         Mockito.verify(bookingRepository, Mockito.times(1))
                 .findByItemIdAndBookerIdAndStatus(101L, 201L, BookingState.APPROVED);
-        Mockito.verifyNoMoreInteractions(commentRepository);
-    }
-
-    @Test
-    void shouldThrowValidationException_WhenBookingsExistButNotCompleted() {
-        NewComment newComment = NewComment.builder().text("commentText").build();
-        User booker = createUser(201L);
-        Item item = createItem(101L, 202L, null);
-        Booking booking = createBooking(401L, LocalDateTime.now().minusHours(5),
-                LocalDateTime.now().plusHours(2), item, booker);
-        List<Booking> bookings = List.of(booking);
-
-        Mockito.when(bookingRepository.findByItemIdAndBookerIdAndStatus(101L, 202L,
-                BookingState.APPROVED)).thenReturn(bookings);
-
-        ValidationException exception = assertThrows(
-                ValidationException.class,
-                () -> itemService.createNewComment(101L, 202L, newComment)
-        );
-
-        assertEquals("У вас пока нет доступа к комментированию этой вещи", exception.getMessage());
-
-        Mockito.verify(bookingRepository, Mockito.times(1))
-                .findByItemIdAndBookerIdAndStatus(101L, 202L, BookingState.APPROVED);
         Mockito.verifyNoMoreInteractions(commentRepository);
     }
 

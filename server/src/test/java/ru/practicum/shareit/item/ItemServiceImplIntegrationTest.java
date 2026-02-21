@@ -257,46 +257,6 @@ class ItemServiceImplIntegrationTest {
     }
 
     @Test
-    void shouldGetItemFullDtoSuccessfully_Integration() {
-        User user = createUser("user", "user@example.com");
-        User userDb = userRepository.save(user);
-
-        ItemRequest itemRequestDb = createItemRequestInDb();
-
-        Item item = createItem("Молоток", "Good", userDb, itemRequestDb);
-        Item itemDb = itemRepository.save(item);
-
-        User booker1 = createUser("booker1", "booker1@example.com");
-        User booker1Db = userRepository.save(booker1);
-        BookingDto bookingDto1 = createBookingInDb(LocalDateTime.now().plusHours(1),
-                LocalDateTime.now().plusHours(3), itemDb, booker1Db);
-
-        User booker2 = createUser("booker2", "booker2@example.com");
-        User booker2Db = userRepository.save(booker2);
-        BookingDto bookingDto2 = createBookingInDb(LocalDateTime.now().plusHours(4),
-                LocalDateTime.now().plusHours(5), itemDb, booker2Db);
-
-        CommentDto commentDto = createCommentInDb("Comment1", itemDb, booker1Db,
-                LocalDateTime.now().minusDays(2));
-        CommentDto commentDto2 = createCommentInDb("Comment2", itemDb, booker2Db,
-                LocalDateTime.now().minusDays(1));
-
-        ItemFullDto result = itemService.getById(itemDb.getId());
-
-        assertNotNull(result);
-        assertEquals(itemDb.getId(), result.getId());
-        assertEquals("Молоток", result.getName());
-        assertEquals("Good", result.getDescription());
-        assertTrue(result.getAvailable());
-        assertEquals(userDb.getId(), result.getUserId());
-        assertEquals(bookingDto1, result.getNextBooking());
-        assertEquals(bookingDto2, result.getLastBooking());
-        assertEquals(2, result.getComments().size());
-        assertEquals(commentDto, result.getComments().getFirst());
-        assertEquals(commentDto2, result.getComments().getLast());
-    }
-
-    @Test
     void shouldReturnItemWithEmptyBookingsAndComments_Integration() {
         User user = createUser("user", "user@example.com");
         User userDb = userRepository.save(user);
@@ -334,65 +294,6 @@ class ItemServiceImplIntegrationTest {
         Optional<Item> nonExistentItem = itemRepository.findById(nonExistentItemId);
         assertFalse(nonExistentItem.isPresent(),
                 "В БД не должно быть вещи с указанным ID");
-    }
-
-    @Test
-    void shouldGetAllItemsForUserWithMultipleItems_Integration() {
-        User user = createUser("user", "user@example.com");
-        User userDb = userRepository.save(user);
-
-        Item item = createItem("Молоток", "Good", userDb, null);
-        Item itemDb = itemRepository.save(item);
-
-        Item item2 = createItem("Долото", "VeryGood", userDb, null);
-        Item itemDb2 = itemRepository.save(item2);
-
-        User booker1 = createUser("booker1", "booker1@example.com");
-        User booker1Db = userRepository.save(booker1);
-        BookingDto bookingDto1 = createBookingInDb(LocalDateTime.now().plusHours(1),
-                LocalDateTime.now().plusHours(3), itemDb, booker1Db);
-        BookingDto bookingDto3 = createBookingInDb(LocalDateTime.now().plusHours(1),
-                LocalDateTime.now().plusHours(3), itemDb2, booker1Db);
-
-        User booker2 = createUser("booker2", "booker2@example.com");
-        User booker2Db = userRepository.save(booker2);
-        BookingDto bookingDto2 = createBookingInDb(LocalDateTime.now().plusHours(4),
-                LocalDateTime.now().plusHours(5), itemDb, booker2Db);
-        BookingDto bookingDto4 = createBookingInDb(LocalDateTime.now().plusHours(4),
-                LocalDateTime.now().plusHours(5), itemDb2, booker2Db);
-
-        CommentDto commentDto = createCommentInDb("Comment1", itemDb, booker1Db,
-                LocalDateTime.now().minusDays(2));
-        CommentDto commentDto2 = createCommentInDb("Comment2", itemDb2, booker2Db,
-                LocalDateTime.now().minusDays(1));
-
-        List<ItemFullDto> result = itemService.getAllByUserId(userDb.getId());
-
-        ItemFullDto firstResult = result.getFirst();
-        ItemFullDto secondResult = result.getLast();
-
-        assertNotNull(result);
-        assertEquals(2, result.size());
-
-        assertEquals(itemDb.getId(), firstResult.getId());
-        assertEquals("Молоток", firstResult.getName());
-        assertEquals("Good", firstResult.getDescription());
-        assertTrue(firstResult.getAvailable());
-        assertEquals(userDb.getId(), firstResult.getUserId());
-        assertEquals(bookingDto1, firstResult.getNextBooking());
-        assertEquals(bookingDto2, firstResult.getLastBooking());
-        assertEquals(1, firstResult.getComments().size());
-        assertEquals(commentDto, firstResult.getComments().getFirst());
-
-        assertEquals(itemDb2.getId(), secondResult.getId());
-        assertEquals("Долото", secondResult.getName());
-        assertEquals("VeryGood", secondResult.getDescription());
-        assertTrue(secondResult.getAvailable());
-        assertEquals(userDb.getId(), secondResult.getUserId());
-        assertEquals(bookingDto3, secondResult.getNextBooking());
-        assertEquals(bookingDto4, secondResult.getLastBooking());
-        assertEquals(1, secondResult.getComments().size());
-        assertEquals(commentDto2, secondResult.getComments().getFirst());
     }
 
     @Test

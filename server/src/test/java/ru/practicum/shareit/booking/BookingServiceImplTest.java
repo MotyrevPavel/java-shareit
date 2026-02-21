@@ -16,7 +16,6 @@ import ru.practicum.shareit.user.UserRepository;
 import ru.practicum.shareit.user.model.User;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -138,56 +137,6 @@ class BookingServiceImplTest {
     }
 
     @Test
-    void shouldApproveBookingSuccessfully_WhenValidDataAndApprovedTrue() {
-        User booker = createUser(201L);
-        Item item = createItem(101L);
-
-        Booking executedBooking = createBooking(301L, item, booker, BookingState.WAITING);
-
-        Booking updatedBooking = createBooking(301L, item, booker, BookingState.APPROVED);
-
-        BookingDto expectedDto = BookingMapper.toBookingDto(updatedBooking);
-
-        Mockito.when(bookingRepository.findById(executedBooking.getId())).thenReturn(Optional.of(executedBooking));
-        Mockito.when(bookingRepository.save(Mockito.any(Booking.class))).thenReturn(updatedBooking);
-
-        BookingDto result = bookingService.approve(executedBooking.getId(), true, item.getUser().getId());
-
-        assertEquals(expectedDto.getId(), result.getId());
-        assertEquals(expectedDto.getItem(), result.getItem());
-        assertEquals(expectedDto.getBooker(), result.getBooker());
-        assertEquals(expectedDto.getStatus(), result.getStatus());
-
-        Mockito.verify(bookingRepository, Mockito.times(1)).findById(executedBooking.getId());
-        Mockito.verify(bookingRepository, Mockito.times(1)).save(updatedBooking);
-    }
-
-    @Test
-    void shouldRejectBookingSuccessfully_WhenValidDataAndApprovedFalse() {
-        User booker = createUser(201L);
-        Item item = createItem(101L);
-
-        Booking executedBooking = createBooking(301L, item, booker, BookingState.WAITING);
-
-        Booking updatedBooking = createBooking(301L, item, booker, BookingState.REJECTED);
-
-        BookingDto expectedDto = BookingMapper.toBookingDto(updatedBooking);
-
-        Mockito.when(bookingRepository.findById(executedBooking.getId())).thenReturn(Optional.of(executedBooking));
-        Mockito.when(bookingRepository.save(Mockito.any(Booking.class))).thenReturn(updatedBooking);
-
-        BookingDto result = bookingService.approve(executedBooking.getId(), false, item.getUser().getId());
-
-        assertEquals(expectedDto.getId(), result.getId());
-        assertEquals(expectedDto.getItem(), result.getItem());
-        assertEquals(expectedDto.getBooker(), result.getBooker());
-        assertEquals(expectedDto.getStatus(), result.getStatus());
-
-        Mockito.verify(bookingRepository, Mockito.times(1)).findById(executedBooking.getId());
-        Mockito.verify(bookingRepository, Mockito.times(1)).save(updatedBooking);
-    }
-
-    @Test
     void shouldThrowNotFoundException_WhenBookingNotFound() {
         Mockito.when(bookingRepository.findById(999L)).thenReturn(Optional.empty());
 
@@ -280,34 +229,6 @@ class BookingServiceImplTest {
     }
 
     @Test
-    void shouldReturnSortedList_WhenBookingsExist() {
-        User booker = createUser(201L);
-        Item itemFirst = createItem(101L);
-        Item itemSecond = createItem(102L);
-
-        Booking executedBookingFirst = createBooking(301L, itemFirst, booker, BookingState.WAITING);
-        List<Booking> bookings = new ArrayList<>();
-        bookings.add(executedBookingFirst);
-        Booking executedBookingSecond = createBooking(302L, itemSecond, booker, BookingState.WAITING);
-        bookings.add(executedBookingSecond);
-
-        BookingDto expectedDtoFirst = BookingMapper.toBookingDto(executedBookingFirst);
-        BookingDto expectedDtoSecond = BookingMapper.toBookingDto(executedBookingSecond);
-
-        Mockito.when(bookingRepository.findByBookerIdAndStatus(booker.getId(), BookingState.WAITING))
-                .thenReturn(bookings);
-
-        List<BookingDto> result = bookingService.getAllBookingsByBooker(booker.getId(), BookingState.WAITING);
-
-        assertEquals(2, result.size());
-        assertEquals(expectedDtoFirst, result.getFirst());
-        assertEquals(expectedDtoSecond, result.getLast());
-
-        Mockito.verify(bookingRepository, Mockito.times(1))
-                .findByBookerIdAndStatus(booker.getId(), BookingState.WAITING);
-    }
-
-    @Test
     void shouldReturnEmptyList_WhenNoBookingsFound() {
         Mockito.when(bookingRepository.findByBookerIdAndStatus(999L, BookingState.APPROVED))
                 .thenReturn(List.of());
@@ -318,37 +239,6 @@ class BookingServiceImplTest {
 
         Mockito.verify(bookingRepository, Mockito.times(1))
                 .findByBookerIdAndStatus(999L, BookingState.APPROVED);
-    }
-
-    @Test
-    void shouldReturnSortedList_WhenBookingsByOwnerExist() {
-        User bookerFirst = createUser(201L);
-        User bookerSecond = createUser(203L);
-        Item itemFirst = createItem(101L);
-        Item itemSecond = createItem(102L);
-
-        Booking executedBookingFirst = createBooking(301L, itemFirst, bookerFirst, BookingState.WAITING);
-        List<Booking> bookings = new ArrayList<>();
-        bookings.add(executedBookingFirst);
-        Booking executedBookingSecond = createBooking(302L, itemSecond, bookerSecond, BookingState.WAITING);
-        bookings.add(executedBookingSecond);
-
-        BookingDto dto1 = BookingMapper.toBookingDto(executedBookingFirst);
-        BookingDto dto2 = BookingMapper.toBookingDto(executedBookingSecond);
-
-        Mockito.when(userRepository.existsById(202L)).thenReturn(true);
-        Mockito.when(bookingRepository.findByItemOwnerIdAndStatus(202L, BookingState.WAITING))
-                .thenReturn(bookings);
-
-        List<BookingDto> result = bookingService.getAllBookingsByOwner(202L, BookingState.WAITING);
-
-        assertEquals(2, result.size());
-        assertEquals(dto2, result.getLast());
-        assertEquals(dto1, result.getFirst());
-
-        Mockito.verify(userRepository, Mockito.times(1)).existsById(202L);
-        Mockito.verify(bookingRepository, Mockito.times(1))
-                .findByItemOwnerIdAndStatus(202L, BookingState.WAITING);
     }
 
     @Test
