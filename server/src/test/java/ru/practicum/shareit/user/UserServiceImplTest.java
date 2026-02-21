@@ -32,7 +32,6 @@ class UserServiceImplTest {
 
         User user = createUserALice();
 
-
         Mockito.when(userRepository.existsByEmail("alice@example.com")).thenReturn(false);
         Mockito.when(userRepository.save(Mockito.any(User.class))).thenReturn(user);
 
@@ -196,7 +195,7 @@ class UserServiceImplTest {
         Mockito.verify(userRepository, Mockito.times(1)).deleteById(1L);
     }
 
-    private User createUserALice(){
+    private User createUserALice() {
         User user = new User();
         user.setId(1L);
         user.setName("Alice");
@@ -204,8 +203,7 @@ class UserServiceImplTest {
         return user;
     }
 
-    private NewUser createNewUserAlice(){
+    private NewUser createNewUserAlice() {
         return NewUser.builder().name("Alice").email("alice@example.com").build();
     }
-
 }
